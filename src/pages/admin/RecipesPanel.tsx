@@ -88,6 +88,7 @@ export default function RecipesPanel() {
     const recipe: Recipe = {
       id: editing?.id ?? `r-${Date.now()}`,
       createdAt: editing?.createdAt ?? Date.now(),
+      sourceUrl: editing?.sourceUrl,
       ...form,
       ingredients: form.ingredients.filter((s) => s.trim()),
       instructions: form.instructions.filter((s) => s.trim()),

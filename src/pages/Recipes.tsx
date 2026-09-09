@@ -40,7 +40,7 @@ export default function Recipes() {
             <GoldDiamond />
           </div>
           <p className="text-cream-muted text-lg font-light leading-relaxed">
-            A curated collection of approachable recipes — each one designed to bring a little more joy to your table.
+            A curated collection of approachable recipes, each one designed to bring a little more joy to your table.
           </p>
         </div>
       </section>
@@ -172,6 +172,16 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
 
         <div className="p-8 md:p-10">
           <p className="text-cream-muted leading-relaxed mb-8">{recipe.description}</p>
+          {recipe.sourceUrl && (
+            <a
+              href={recipe.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 text-gold text-xs tracking-[0.25em] uppercase border-b border-gold/40 pb-1 mb-8 hover:border-gold transition-colors"
+            >
+              Watch the reel on Instagram <span aria-hidden>→</span>
+            </a>
+          )}
 
           {/* Meta row */}
           <div className="grid grid-cols-4 gap-4 border-y border-gold/10 py-6 mb-8">

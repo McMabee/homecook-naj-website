@@ -10,6 +10,8 @@ export interface Recipe {
   ingredients: string[]
   instructions: string[]
   imageUrl: string
+  /** Link to the Instagram post the recipe was published in, if any. */
+  sourceUrl?: string
   createdAt: number
 }
 

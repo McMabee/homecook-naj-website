@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
+import spicesImage from '../assets/naj-spices.jpg'
 import GoldDiamond from '../components/GoldDiamond'
 import { useSettings, instagramUrl } from '../store/settings'
 
@@ -48,9 +49,9 @@ export default function Contact() {
       <section className="relative py-36 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-charcoal">
           <img
-            src="https://images.unsplash.com/photo-1577106263724-2c8e03bfe9cf?w=1920&h=700&fit=crop&auto=format"
-            alt="Chef carefully preparing a dish"
-            className="w-full h-full object-cover opacity-40"
+            src={spicesImage}
+            alt="Naj reaching into a drawer of labelled spice jars"
+            className="w-full h-full object-cover object-[50%_35%] opacity-40"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-obsidian/80 via-obsidian/50 to-obsidian" />
         </div>
@@ -67,7 +68,7 @@ export default function Contact() {
             <GoldDiamond />
           </div>
           <p className="text-cream-muted text-lg font-light leading-relaxed">
-            Whether you have a date in mind or just a craving — reach out and let's make it happen.
+            Whether you have a date in mind or just a craving, reach out and let's make it happen.
           </p>
         </div>
       </section>
@@ -87,12 +88,12 @@ export default function Contact() {
                 <div className="w-12 h-px bg-gold mx-auto mb-8" />
                 <p className="font-display text-3xl italic text-gold mb-4">Thank You!</p>
                 <p className="text-cream-muted leading-relaxed max-w-sm mx-auto">
-                  Your message has been sent. I can't wait to chat — I'll be in touch shortly!
+                  Your message has been sent. I can't wait to chat, and I'll be in touch shortly!
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
-                <input type="hidden" name="_subject" value="New Enquiry — Home Cooking with Naj" />
+                <input type="hidden" name="_subject" value="New Enquiry: Home Cooking with Naj" />
                 {/* Honeypot: hidden from people, filled in by bots, rejected by FormSubmit */}
                 <input type="text" name="_honey" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
 
@@ -222,7 +223,7 @@ export default function Contact() {
               <div className="border border-gold/20 p-8">
                 <h3 className="font-display text-xl italic text-gold mb-3">Follow Along</h3>
                 <p className="text-cream-muted text-sm mb-6">
-                  Recipes, behind-the-scenes, and food inspo — find me on social.
+                  Recipes, behind-the-scenes, and food inspo. Find me on social.
                 </p>
                 <div className="flex flex-col gap-3">
                   {[
@@ -247,7 +248,7 @@ export default function Contact() {
                 <p className="font-display text-base italic text-cream leading-relaxed">
                   "Every experience begins with a conversation. I can't wait to hear about yours."
                 </p>
-                <p className="text-gold text-[10px] tracking-[0.3em] uppercase mt-4">— Naj</p>
+                <p className="text-gold text-[10px] tracking-[0.3em] uppercase mt-4">Naj</p>
               </div>
             </div>
           </div>

@@ -1,6 +1,8 @@
 import type { Page } from '../types'
 import heroImage from '../assets/naj-hero.jpg'
 import portraitImage from '../assets/naj-portrait.jpg'
+import dinnerImage from '../assets/naj-dinner.jpg'
+import BrandPartners from '../components/BrandPartners'
 import GoldDiamond from '../components/GoldDiamond'
 import InstagramFeed from '../components/InstagramFeed'
 
@@ -37,7 +39,7 @@ export default function Home({ setPage }: HomeProps) {
             <GoldDiamond />
           </div>
           <p className="text-cream-muted text-lg md:text-xl font-light max-w-lg mx-auto leading-relaxed mb-12">
-            Bringing warmth, heritage, and restaurant-quality food to your table — from Ancaster and Hamilton to Burlington and Oakville.
+            Bringing warmth, heritage, and restaurant-quality food to your table, from Ancaster and Hamilton to Burlington and Oakville.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
@@ -77,10 +79,10 @@ export default function Home({ setPage }: HomeProps) {
                 <GoldDiamond />
               </div>
               <p className="text-cream-muted leading-relaxed mb-5 text-[15px]">
-                Hi, I'm Naj — a home cook, culinary creator, and private chef based in Ancaster, Ontario. I grew up surrounded by the bold, fragrant cooking of my Jordanian and Palestinian family, and fell even deeper in love with food after marrying into an Italian one. That beautiful blend of cultures lives in everything I make.
+                Hi, I'm Naj, a home cook, culinary creator, and private chef based in Ancaster, Ontario. I grew up surrounded by the bold, fragrant cooking of my Jordanian and Palestinian family, and fell even deeper in love with food after marrying into an Italian one. That beautiful blend of cultures lives in everything I make.
               </p>
               <p className="text-cream-muted leading-relaxed mb-5 text-[15px]">
-                What started as a passion for feeding the people I love has grown into a full culinary business. I've competed on the Food Network's <em className="text-cream">Wall of Chefs</em>, built a community of food lovers online, and — most importantly — cooked unforgettable meals in kitchens just like yours across Hamilton, Ancaster, Burlington, and Oakville.
+                What started as a passion for feeding the people I love has grown into a full culinary business. I've competed on the Food Network's <em className="text-cream">Wall of Chefs</em>, built a community of food lovers online, and, most importantly, cooked unforgettable meals in kitchens just like yours across Hamilton, Ancaster, Burlington, and Oakville.
               </p>
               <p className="text-cream-muted leading-relaxed mb-12 text-[15px]">
                 Whether I'm curating a private dinner, teaching you to build the perfect grazing table, or stocking your freezer with wholesome family meals, my goal is always the same: to make your table a place people never want to leave.
@@ -116,12 +118,15 @@ export default function Home({ setPage }: HomeProps) {
           <div className="max-w-2xl mx-auto text-center mt-28">
             <div className="w-10 h-px bg-gold mx-auto mb-8" />
             <blockquote className="font-display text-2xl md:text-3xl italic text-cream leading-relaxed">
-              "Food doesn't need to be complicated to be extraordinary — it just needs to be made with love."
+              "Food doesn't need to be complicated to be extraordinary. It just needs to be made with love."
             </blockquote>
-            <p className="text-gold text-xs tracking-[0.35em] uppercase mt-6">— Naj</p>
+            <p className="text-gold text-xs tracking-[0.35em] uppercase mt-6">Naj</p>
           </div>
         </div>
       </section>
+
+      {/* ── Brand partners ───────────────────────────────────────────── */}
+      <BrandPartners />
 
       {/* ── Services ─────────────────────────────────────────────────── */}
       <section id="services" className="py-28 md:py-40 px-6 bg-charcoal">
@@ -168,7 +173,7 @@ export default function Home({ setPage }: HomeProps) {
             a little magic.
           </h2>
           <p className="text-cream-muted text-lg font-light max-w-xl mx-auto leading-relaxed mb-12">
-            From intimate private dinners to hands-on workshops and stunning grazing tables — every experience I create is rooted in real food, real flavour, and genuine hospitality.
+            From intimate private dinners to hands-on workshops and stunning grazing tables, every experience I create is rooted in real food, real flavour, and genuine hospitality.
           </p>
           <button
             onClick={() => setPage('contact')}
@@ -223,9 +228,9 @@ const SERVICES = [
   {
     title: 'Private In-Home Dinners',
     description:
-      'Restaurant-quality food in the comfort of your own home. From an intimate dinner for two to a celebration for twenty, I take care of everything — menu creation, grocery sourcing, cooking, plating, and clean-up. You just show up and enjoy.',
-    image: 'https://images.unsplash.com/photo-1663530761401-15eefb544889?w=800&h=600&fit=crop&auto=format',
-    imageAlt: 'Chef finishing a gourmet plate',
+      'Restaurant-quality food in the comfort of your own home. From an intimate dinner for two to a celebration for twenty, I take care of everything: menu creation, grocery sourcing, cooking, plating, and clean-up. You just show up and enjoy.',
+    image: dinnerImage,
+    imageAlt: 'Bowl of homemade tomato sauce topped with fresh basil and parmesan, with garlic, tomatoes, and bread alongside',
   },
   {
     title: 'Cooking Workshops & Demos',
@@ -237,14 +242,14 @@ const SERVICES = [
   {
     title: 'Grazing Tables & Charcuterie',
     description:
-      'Stunning grazing tables and boards that are as beautiful as they are delicious. Rooted in the Middle Eastern tradition of generous, abundant spreads — elevated with artisan cheeses, cured meats, seasonal fruit, and gorgeous presentation.',
+      'Stunning grazing tables and boards that are as beautiful as they are delicious. Rooted in the Middle Eastern tradition of generous, abundant spreads, elevated with artisan cheeses, cured meats, seasonal fruit, and gorgeous presentation.',
     image: 'https://images.unsplash.com/photo-1678572823447-45fc146df43c?w=800&h=600&fit=crop&auto=format',
     imageAlt: 'Luxury grazing table spread',
   },
   {
     title: 'Custom Meal Prep',
     description:
-      'Give your family the gift of real, nourishing meals without the weeknight scramble. I offer weekly family meal planning and freezer meal packages — all made from scratch with the same care and flavour as everything else I cook.',
+      'Give your family the gift of real, nourishing meals without the weeknight scramble. I offer weekly family meal planning and freezer meal packages, all made from scratch with the same care and flavour as everything else I cook.',
     image: 'https://images.unsplash.com/photo-1543352632-5a4b24e4d2a6?w=800&h=600&fit=crop&auto=format',
     imageAlt: 'Meal prep containers with healthy food',
   },
