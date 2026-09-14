@@ -40,7 +40,7 @@ export default function Footer({ setPage }: FooterProps) {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-cream-muted">
           <div className="text-center md:text-left space-y-1">
             <p>© {new Date().getFullYear()} Home Cooking with Naj. All rights reserved.</p>
-            <p className="text-cream-muted/60">Private chef serving Hamilton, Ancaster, Burlington &amp; Oakville, Ontario.</p>
+            <p className="text-cream-muted/60">Private home chef serving Hamilton, Ancaster, Burlington &amp; Oakville, Ontario.</p>
           </div>
           <div className="flex items-center gap-6">
             <a

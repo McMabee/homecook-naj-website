@@ -1,6 +1,6 @@
 # Home Cooking with Naj
 
-Marketing site for Home Cooking with Naj, a private chef and culinary creator based in Ancaster, Ontario, serving Hamilton, Burlington, and Oakville. Views: Home (hero, about, brand partners, services, Instagram tiles, service area), Recipes, Contact, and a hidden admin for recipes, Instagram tiles, and social links.
+Marketing site for Home Cooking with Naj, a private home chef and culinary creator based in Ancaster, Ontario, serving Hamilton, Burlington, and Oakville. Views: Home (hero, about, brand partners, services, Instagram tiles, service area), Recipes, Contact, and a hidden admin for recipes, Instagram tiles, and social links.
 
 ## Stack
 

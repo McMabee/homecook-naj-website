@@ -79,7 +79,7 @@ export default function Home({ setPage }: HomeProps) {
                 <GoldDiamond />
               </div>
               <p className="text-cream-muted leading-relaxed mb-5 text-[15px]">
-                Hi, I’m Naj, a home cook, culinary creator, and private chef based in Ancaster, Ontario. I grew up surrounded by the bold, fragrant flavours of my Jordanian and Palestinian family and fell even deeper in love with food after marrying into an Italian family. That beautiful blend of cultures influences so much of what I create today.
+                Hi, I’m Naj, a home cook, culinary creator, and private home chef based in Ancaster, Ontario. I grew up surrounded by the bold, fragrant flavours of my Jordanian and Palestinian family and fell even deeper in love with food after marrying into an Italian family. That beautiful blend of cultures influences so much of what I create today.
               </p>
               <p className="text-cream-muted leading-relaxed mb-5 text-[15px]">
                 What started as a passion for feeding the people I love has grown into a culinary business I’m incredibly proud of. I competed on Flavour Network’s Wall of Chefs and have built a community of food lovers online. Most importantly, I’ve created memorable meals and experiences for families and guests throughout Ancaster, Hamilton, Burlington, Oakville, and the surrounding area.
