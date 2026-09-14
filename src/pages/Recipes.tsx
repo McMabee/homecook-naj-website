@@ -1,18 +1,13 @@
 import { useState, useEffect } from 'react'
 import type { Recipe } from '../types'
-import { getRecipes } from '../store/recipes'
+import { useContent } from '../store/content'
 import GoldDiamond from '../components/GoldDiamond'
 
-const CATEGORIES = ['All', 'Mains', 'Sharing', 'Starters', 'Desserts', 'Sides', 'Sauces & Basics']
-
 export default function Recipes() {
-  const [recipes, setRecipes] = useState<Recipe[]>([])
+  const { recipes, status } = useContent()
   const [active, setActive] = useState<Recipe | null>(null)
   const [category, setCategory] = useState('All')
-
-  useEffect(() => {
-    setRecipes(getRecipes())
-  }, [])
+  const loading = status === 'loading'
 
   const filtered =
     category === 'All' ? recipes : recipes.filter((r) => r.category === category)
@@ -67,7 +62,9 @@ export default function Recipes() {
       {/* Recipe grid */}
       <section className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <RecipeGridSkeleton />
+          ) : filtered.length === 0 ? (
             <div className="text-center py-24">
               <p className="font-display text-2xl italic text-cream-muted">No recipes yet in this category.</p>
               <p className="text-cream-muted/50 text-sm mt-3">Check back soon!</p>
@@ -85,6 +82,25 @@ export default function Recipes() {
       {/* Recipe modal */}
       {active && <RecipeModal recipe={active} onClose={() => setActive(null)} />}
     </main>
+  )
+}
+
+/* ── Loading placeholder ─────────────────────────────────────────── */
+
+function RecipeGridSkeleton() {
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-gold/10" aria-busy="true" aria-label="Loading recipes">
+      {Array.from({ length: 6 }, (_, i) => (
+        <div key={i} className="bg-charcoal animate-pulse" aria-hidden="true">
+          <div className="h-56 bg-obsidian/60" />
+          <div className="p-8 space-y-4">
+            <div className="h-5 w-2/3 bg-obsidian/60" />
+            <div className="h-3 w-full bg-obsidian/60" />
+            <div className="h-3 w-5/6 bg-obsidian/60" />
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 

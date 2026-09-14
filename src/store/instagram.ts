@@ -35,10 +35,11 @@ export const SEED_POSTS: InstagramPost[] = [
   },
 ]
 
-export function getInstagramPosts(): InstagramPost[] {
+export function getInstagramPosts(): Promise<InstagramPost[]> {
   return readJSON<InstagramPost[]>(KEY, SEED_POSTS)
 }
 
-export function saveInstagramPosts(posts: InstagramPost[]): void {
-  writeJSON(KEY, posts)
+/** Replaces the whole tile list (order matters: the first tiles are the ones shown). */
+export function saveInstagramPosts(posts: InstagramPost[]): Promise<void> {
+  return writeJSON(KEY, posts)
 }

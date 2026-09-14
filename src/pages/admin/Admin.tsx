@@ -1,11 +1,11 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import RecipesPanel from './RecipesPanel'
 import InstagramPanel from './InstagramPanel'
 import SettingsPanel from './SettingsPanel'
-import { Field, inputClass, primaryButtonClass } from './ui'
-
-// Set VITE_ADMIN_PASSWORD in .env. This is bundled client-side, so it only deters casual visitors.
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD
+import { Field, Notice, inputClass, primaryButtonClass } from './ui'
+import { supabase, isSupabaseConfigured } from '../../lib/supabase'
+import { useContent } from '../../store/content'
+import type { AuthState } from '../../lib/auth'
 
 type Tab = 'recipes' | 'instagram' | 'settings'
 
@@ -16,26 +16,19 @@ const TABS: { id: Tab; label: string }[] = [
 ]
 
 interface AdminProps {
+  auth: AuthState
   /** Leave the admin and return to the public site. */
   onExit: () => void
 }
 
-export default function Admin({ onExit }: AdminProps) {
-  const [authed, setAuthed] = useState(false)
+/**
+ * The owner's admin. Access is a Supabase Auth login; the sign-in state here
+ * only decides what to show, while the database and storage policies are what
+ * actually stop anyone else from writing.
+ */
+export default function Admin({ auth, onExit }: AdminProps) {
   const [tab, setTab] = useState<Tab>('recipes')
-  const [pw, setPw] = useState('')
-  const [pwError, setPwError] = useState(false)
-
-  const login = (e: FormEvent) => {
-    e.preventDefault()
-    if (ADMIN_PASSWORD && pw === ADMIN_PASSWORD) {
-      setPwError(false)
-      setPw('')
-      setAuthed(true)
-    } else {
-      setPwError(true)
-    }
-  }
+  const content = useContent()
 
   const backToSite = (
     <button
@@ -46,59 +39,33 @@ export default function Admin({ onExit }: AdminProps) {
     </button>
   )
 
-  /* ── Login ──────────────────────────────────────────────────────── */
-  if (!authed) {
+  if (!auth.ready) {
     return (
       <main className="min-h-screen flex items-center justify-center px-6 py-16">
-        <div className="w-full max-w-sm">
-          <div className="mb-8">{backToSite}</div>
-          <div className="text-center mb-10">
-            <p className="text-gold tracking-[0.4em] text-xs uppercase mb-4">Admin Access</p>
-            <h1 className="font-display text-4xl italic text-cream">Site Manager</h1>
-          </div>
-          <form onSubmit={login} className="border border-gold/20 p-8 space-y-6">
-            <div>
-              <Field label="Password">
-                <input
-                  type="password"
-                  value={pw}
-                  onChange={(e) => {
-                    setPw(e.target.value)
-                    setPwError(false)
-                  }}
-                  autoFocus
-                  placeholder="Enter admin password"
-                  className={`${inputClass} ${pwError ? 'border-red-500/60' : ''}`}
-                />
-              </Field>
-              {pwError && <p className="text-red-400/80 text-xs mt-2">Incorrect password. Please try again.</p>}
-            </div>
-            <button type="submit" disabled={!ADMIN_PASSWORD} className={`${primaryButtonClass} w-full`}>
-              Enter
-            </button>
-          </form>
-          {!ADMIN_PASSWORD && (
-            <p className="text-center text-cream-muted/40 text-xs mt-6 tracking-wider leading-relaxed">
-              Admin access isn't set up yet. Add VITE_ADMIN_PASSWORD to your .env file and restart the dev server.
-            </p>
-          )}
-        </div>
+        <p className="text-cream-muted/60 text-xs tracking-[0.3em] uppercase">Loading…</p>
       </main>
     )
   }
+
+  if (!auth.session) return <LoginScreen backToSite={backToSite} />
+
+  if (auth.recovery) return <NewPasswordScreen backToSite={backToSite} onDone={auth.clearRecovery} />
 
   /* ── Panel ──────────────────────────────────────────────────────── */
   return (
     <main className="min-h-screen px-6 py-10">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center justify-between gap-4 mb-10">
           {backToSite}
-          <button
-            onClick={() => setAuthed(false)}
-            className="text-cream-muted/60 hover:text-gold transition-colors text-xs tracking-[0.25em] uppercase"
-          >
-            Log out
-          </button>
+          <div className="flex items-center gap-5 min-w-0">
+            <span className="text-cream-muted/50 text-xs truncate">{auth.session.user.email}</span>
+            <button
+              onClick={() => void supabase?.auth.signOut()}
+              className="text-cream-muted/60 hover:text-gold transition-colors text-xs tracking-[0.25em] uppercase shrink-0"
+            >
+              Log out
+            </button>
+          </div>
         </div>
 
         <div className="mb-8">
@@ -122,14 +89,234 @@ export default function Admin({ onExit }: AdminProps) {
         </nav>
 
         <p className="text-cream-muted/40 text-xs leading-relaxed mb-10 border border-gold/10 px-4 py-3">
-          Heads up: changes made here are saved in this browser only. Until the site has a backend, visitors won't see
-          them.
+          Changes you save here are published to the live site straight away. There is no undo, so keep one admin tab
+          open at a time.
         </p>
 
-        {tab === 'recipes' && <RecipesPanel />}
-        {tab === 'instagram' && <InstagramPanel />}
-        {tab === 'settings' && <SettingsPanel />}
+        {content.status === 'loading' ? (
+          <p className="text-cream-muted/60 text-xs tracking-[0.3em] uppercase py-10 text-center">Loading content…</p>
+        ) : content.status === 'error' ? (
+          // The panels edit whole lists, so saving on top of fallback data would overwrite the live content.
+          <div className="space-y-4">
+            <Notice tone="error">
+              The live content could not be loaded, so saving now could overwrite what visitors see. {content.error}
+            </Notice>
+            <button type="button" onClick={() => void content.refresh()} className={primaryButtonClass}>
+              Try again
+            </button>
+          </div>
+        ) : (
+          <>
+            {tab === 'recipes' && <RecipesPanel />}
+            {tab === 'instagram' && <InstagramPanel />}
+            {tab === 'settings' && <SettingsPanel />}
+          </>
+        )}
       </div>
     </main>
+  )
+}
+
+/* ── Shared frame for the sign-in screens ─────────────────────────── */
+
+function AuthFrame({ backToSite, title, children }: { backToSite: ReactNode; title: string; children: ReactNode }) {
+  return (
+    <main className="min-h-screen flex items-center justify-center px-6 py-16">
+      <div className="w-full max-w-sm">
+        <div className="mb-8">{backToSite}</div>
+        <div className="text-center mb-10">
+          <p className="text-gold tracking-[0.4em] text-xs uppercase mb-4">Admin Access</p>
+          <h1 className="font-display text-4xl italic text-cream">{title}</h1>
+        </div>
+        {children}
+      </div>
+    </main>
+  )
+}
+
+/* ── Login / forgot password ──────────────────────────────────────── */
+
+function LoginScreen({ backToSite }: { backToSite: ReactNode }) {
+  const [screen, setScreen] = useState<'login' | 'reset'>('login')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
+
+  const signIn = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!supabase || busy) return
+    setBusy(true)
+    setError(null)
+    setInfo(null)
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+    setBusy(false)
+    if (error) {
+      setError(
+        /invalid login credentials/i.test(error.message)
+          ? 'Incorrect email or password. Please try again.'
+          : error.message,
+      )
+    }
+    // On success the auth listener in useAuth() picks up the session and this screen goes away.
+  }
+
+  const sendReset = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!supabase || busy) return
+    setBusy(true)
+    setError(null)
+    setInfo(null)
+    const redirectTo = `${window.location.origin}${window.location.pathname}`
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo })
+    setBusy(false)
+    if (error) setError(error.message)
+    else setInfo('If that address has an account, a reset link is on its way. Open it on this device to choose a new password.')
+  }
+
+  const switchScreen = (next: 'login' | 'reset') => {
+    setScreen(next)
+    setError(null)
+    setInfo(null)
+  }
+
+  const emailField = (
+    <Field label="Email">
+      <input
+        type="email"
+        required
+        autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        autoFocus
+        placeholder="you@example.com"
+        className={inputClass}
+      />
+    </Field>
+  )
+
+  return (
+    <AuthFrame backToSite={backToSite} title={screen === 'login' ? 'Site Manager' : 'Reset Password'}>
+      {screen === 'login' ? (
+        <form onSubmit={signIn} className="border border-gold/20 p-8 space-y-6">
+          {emailField}
+          <Field label="Password">
+            <input
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              className={`${inputClass} ${error ? 'border-red-500/60' : ''}`}
+            />
+          </Field>
+          {error && <Notice tone="error">{error}</Notice>}
+          <button type="submit" disabled={!isSupabaseConfigured || busy} className={`${primaryButtonClass} w-full`}>
+            {busy ? 'Signing in…' : 'Enter'}
+          </button>
+          <button
+            type="button"
+            onClick={() => switchScreen('reset')}
+            className="block w-full text-center text-cream-muted/50 hover:text-gold transition-colors text-xs tracking-wider"
+          >
+            Forgot your password?
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={sendReset} className="border border-gold/20 p-8 space-y-6">
+          <p className="text-cream-muted/60 text-sm leading-relaxed">
+            Enter the email you sign in with and we will send a link to choose a new password.
+          </p>
+          {emailField}
+          {error && <Notice tone="error">{error}</Notice>}
+          {info && <Notice tone="success">{info}</Notice>}
+          <button type="submit" disabled={!isSupabaseConfigured || busy} className={`${primaryButtonClass} w-full`}>
+            {busy ? 'Sending…' : 'Send reset link'}
+          </button>
+          <button
+            type="button"
+            onClick={() => switchScreen('login')}
+            className="block w-full text-center text-cream-muted/50 hover:text-gold transition-colors text-xs tracking-wider"
+          >
+            Back to sign in
+          </button>
+        </form>
+      )}
+      {!isSupabaseConfigured && (
+        <p className="text-center text-cream-muted/40 text-xs mt-6 tracking-wider leading-relaxed">
+          Admin access isn't set up yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to your .env file and
+          restart the dev server.
+        </p>
+      )}
+    </AuthFrame>
+  )
+}
+
+/* ── Choose a new password after a reset link ─────────────────────── */
+
+function NewPasswordScreen({ backToSite, onDone }: { backToSite: ReactNode; onDone: () => void }) {
+  const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!supabase || busy) return
+    if (password.length < 8) {
+      setError('Use at least 8 characters.')
+      return
+    }
+    if (password !== confirm) {
+      setError('The two passwords do not match.')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    const { error } = await supabase.auth.updateUser({ password })
+    setBusy(false)
+    if (error) setError(error.message)
+    else onDone()
+  }
+
+  return (
+    <AuthFrame backToSite={backToSite} title="New Password">
+      <form onSubmit={submit} className="border border-gold/20 p-8 space-y-6">
+        <Field label="New password">
+          <input
+            type="password"
+            required
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoFocus
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Confirm new password">
+          <input
+            type="password"
+            required
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            className={inputClass}
+          />
+        </Field>
+        {error && <Notice tone="error">{error}</Notice>}
+        <button type="submit" disabled={busy} className={`${primaryButtonClass} w-full`}>
+          {busy ? 'Saving…' : 'Save password'}
+        </button>
+        <button
+          type="button"
+          onClick={onDone}
+          className="block w-full text-center text-cream-muted/50 hover:text-gold transition-colors text-xs tracking-wider"
+        >
+          Skip for now
+        </button>
+      </form>
+    </AuthFrame>
   )
 }

@@ -1,5 +1,6 @@
 import type { Page } from '../types'
-import { useSettings, instagramUrl } from '../store/settings'
+import { useSettings } from '../store/content'
+import { instagramUrl } from '../store/settings'
 
 interface FooterProps {
   setPage: (p: Page) => void

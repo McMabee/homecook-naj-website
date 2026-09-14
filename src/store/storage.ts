@@ -1,33 +1,30 @@
+import { supabase, requireSupabase, CONTENT_TABLE, describeSupabaseError } from '../lib/supabase'
+
 /**
  * Single place where site content is read and written.
  *
- * Today this is the browser's localStorage, which means anything saved in the
- * admin only exists in that browser. When a real backend arrives, swap the
- * bodies of these two functions (or make them async) and the stores built on
- * them (recipes, instagram, settings) keep working.
+ * Each content key (recipes, Instagram tiles, settings) is one row in the
+ * Supabase `site_content` table: `key text primary key, value jsonb,
+ * updated_at timestamptz`. Row-level security lets anyone read and only a
+ * signed-in owner write, so the publishable key in the bundle is enough for
+ * visitors and the admin relies on the owner's login.
+ *
+ * When Supabase is not configured (no VITE_SUPABASE_* values), reads return
+ * the fallback so the site still renders its seed content, and writes fail
+ * with a clear message.
  */
 
-export class StorageFullError extends Error {
-  constructor() {
-    super('Browser storage is full. Remove a few photos or use smaller ones, then try again.')
-    this.name = 'StorageFullError'
-  }
+export async function readJSON<T>(key: string, fallback: T): Promise<T> {
+  if (!supabase) return fallback
+  const { data, error } = await supabase.from(CONTENT_TABLE).select('value').eq('key', key).maybeSingle()
+  if (error) throw new Error(`Could not load the site content (${error.message}).`)
+  return data ? (data.value as T) : fallback
 }
 
-export function readJSON<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key)
-    return raw ? (JSON.parse(raw) as T) : fallback
-  } catch {
-    return fallback
-  }
-}
-
-export function writeJSON(key: string, value: unknown): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(value))
-  } catch (err) {
-    if (err instanceof DOMException && /quota/i.test(err.name)) throw new StorageFullError()
-    throw err
-  }
+export async function writeJSON(key: string, value: unknown): Promise<void> {
+  const client = requireSupabase()
+  const { error } = await client
+    .from(CONTENT_TABLE)
+    .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' })
+  if (error) throw new Error(describeSupabaseError(error, 'save your changes'))
 }

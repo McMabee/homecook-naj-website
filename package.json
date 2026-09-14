@@ -11,7 +11,10 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "format": "oxfmt"
+    "format": "oxfmt",
+    "content:export": "node scripts/export-content.mjs",
+    "content:restore": "node scripts/restore-content.mjs",
+    "images:export": "node scripts/export-images.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

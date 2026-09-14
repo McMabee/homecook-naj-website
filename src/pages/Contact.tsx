@@ -1,7 +1,8 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import spicesImage from '../assets/naj-spices.jpg'
 import GoldDiamond from '../components/GoldDiamond'
-import { useSettings, instagramUrl } from '../store/settings'
+import { useSettings } from '../store/content'
+import { instagramUrl } from '../store/settings'
 
 const FORM_ENDPOINT = import.meta.env.VITE_FORMSUBMIT_ENDPOINT
 

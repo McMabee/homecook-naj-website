@@ -1,15 +1,19 @@
 import { useState, type FormEvent } from 'react'
 import type { SiteSettings } from '../../types'
-import { getSettings, saveSettings, normalizeHandle, instagramUrl } from '../../store/settings'
+import { saveSettings, normalizeHandle, instagramUrl } from '../../store/settings'
+import { useContent } from '../../store/content'
 import { Field, Notice, Section, errorMessage, inputClass, primaryButtonClass } from './ui'
 
 export default function SettingsPanel() {
-  const [form, setForm] = useState<SiteSettings>(getSettings)
+  const { settings, setSettings } = useContent()
+  const [form, setForm] = useState<SiteSettings>(settings)
   const [saved, setSaved] = useState(false)
+  const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleSave = (e: FormEvent) => {
+  const handleSave = async (e: FormEvent) => {
     e.preventDefault()
+    if (busy) return
     const next: SiteSettings = {
       instagramHandle: normalizeHandle(form.instagramHandle),
       facebookUrl: form.facebookUrl.trim(),
@@ -18,14 +22,18 @@ export default function SettingsPanel() {
       setError('Please enter an Instagram handle.')
       return
     }
+    setBusy(true)
     try {
-      saveSettings(next)
+      await saveSettings(next)
+      setSettings(next)
       setForm(next)
       setError(null)
       setSaved(true)
       setTimeout(() => setSaved(false), 1500)
     } catch (err) {
       setError(errorMessage(err))
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -67,9 +75,10 @@ export default function SettingsPanel() {
 
       <button
         type="submit"
+        disabled={busy}
         className={`${primaryButtonClass} ${saved ? 'bg-emerald-600 text-white hover:bg-emerald-600' : ''}`}
       >
-        {saved ? '✓ Saved' : 'Save Settings'}
+        {saved ? '✓ Saved' : busy ? 'Saving…' : 'Save Settings'}
       </button>
     </form>
   )

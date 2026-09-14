@@ -11,8 +11,11 @@ const day = (iso: string) => new Date(iso).getTime()
  * method, the steps follow her reel and standard technique; the comment above
  * each recipe says which. Photos are the reel cover frames, cropped to a 3:2
  * still and stored in public/recipes/.
+ *
+ * These are what visitors see until the first save from the admin, and what
+ * the site falls back to if the backend cannot be reached.
  */
-const SEED: Recipe[] = [
+export const SEED_RECIPES: Recipe[] = [
   // Ingredients from the caption; method written to match the reel.
   {
     id: 'romano-bean-stew',
@@ -339,21 +342,26 @@ const SEED: Recipe[] = [
   },
 ]
 
-export function getRecipes(): Recipe[] {
-  return readJSON<Recipe[]>(KEY, SEED)
+export function getRecipes(): Promise<Recipe[]> {
+  return readJSON<Recipe[]>(KEY, SEED_RECIPES)
 }
 
-export function saveRecipe(recipe: Recipe): void {
-  const all = [...getRecipes()]
+/** Adds or replaces a recipe and returns the full published list. */
+export async function saveRecipe(recipe: Recipe): Promise<Recipe[]> {
+  const all = [...(await getRecipes())]
   const idx = all.findIndex((r) => r.id === recipe.id)
   if (idx >= 0) {
     all[idx] = recipe
   } else {
     all.unshift(recipe)
   }
-  writeJSON(KEY, all)
+  await writeJSON(KEY, all)
+  return all
 }
 
-export function deleteRecipe(id: string): void {
-  writeJSON(KEY, getRecipes().filter((r) => r.id !== id))
+/** Removes a recipe and returns the full published list. */
+export async function deleteRecipe(id: string): Promise<Recipe[]> {
+  const next = (await getRecipes()).filter((r) => r.id !== id)
+  await writeJSON(KEY, next)
+  return next
 }

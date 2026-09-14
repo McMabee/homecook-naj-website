@@ -21,3 +21,6 @@ Thumbs.db
 .idea
 .vscode/*
 !.vscode/extensions.json
+
+# Photo backups from `npm run images:export` (binary and can grow; copy them to a cloud drive instead)
+backups/images

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import type { Recipe } from '../../types'
-import { getRecipes, saveRecipe, deleteRecipe } from '../../store/recipes'
+import { saveRecipe, deleteRecipe } from '../../store/recipes'
+import { useContent } from '../../store/content'
 import {
   Field,
   ImageField,
@@ -36,17 +37,24 @@ const selectArrow = (
   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gold text-xs pointer-events-none">▾</span>
 )
 
+/** Chosen when the form opens so a photo uploaded before the first save has a stable name. */
+const newRecipeId = () => `r-${Date.now()}`
+
 export default function RecipesPanel() {
-  const [recipes, setRecipes] = useState<Recipe[]>(getRecipes)
+  const { recipes, setRecipes } = useContent()
   const [mode, setMode] = useState<'list' | 'form'>('list')
   const [editing, setEditing] = useState<Recipe | null>(null)
+  const [draftId, setDraftId] = useState(newRecipeId)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [saved, setSaved] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
 
   const openNew = () => {
     setEditing(null)
+    setDraftId(newRecipeId())
     setForm(EMPTY_FORM)
     setSaved(false)
     setError(null)
@@ -72,35 +80,41 @@ export default function RecipesPanel() {
     setMode('form')
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    if (busy) return
+    setBusy(true)
     try {
-      deleteRecipe(id)
-      setRecipes(getRecipes())
+      setRecipes(await deleteRecipe(id))
       setDeleteConfirm(null)
       setError(null)
     } catch (err) {
       setError(errorMessage(err))
+    } finally {
+      setBusy(false)
     }
   }
 
-  const handleSave = (e: FormEvent) => {
+  const handleSave = async (e: FormEvent) => {
     e.preventDefault()
+    if (busy || uploading) return
     const recipe: Recipe = {
-      id: editing?.id ?? `r-${Date.now()}`,
+      id: editing?.id ?? draftId,
       createdAt: editing?.createdAt ?? Date.now(),
       sourceUrl: editing?.sourceUrl,
       ...form,
       ingredients: form.ingredients.filter((s) => s.trim()),
       instructions: form.instructions.filter((s) => s.trim()),
     }
+    setBusy(true)
     try {
-      saveRecipe(recipe)
-      setRecipes(getRecipes())
+      setRecipes(await saveRecipe(recipe))
       setSaved(true)
       setError(null)
       setTimeout(() => setMode('list'), 900)
     } catch (err) {
       setError(errorMessage(err))
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -170,9 +184,10 @@ export default function RecipesPanel() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleDelete(r.id)}
-                        className="text-xs tracking-widest uppercase text-red-400 border border-red-500/30 px-3 py-2 hover:bg-red-500/10 transition-colors"
+                        disabled={busy}
+                        className="text-xs tracking-widest uppercase text-red-400 border border-red-500/30 px-3 py-2 hover:bg-red-500/10 transition-colors disabled:opacity-40"
                       >
-                        Confirm
+                        {busy ? 'Deleting…' : 'Confirm'}
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(null)}
@@ -297,7 +312,13 @@ export default function RecipesPanel() {
               />
             </Field>
           </div>
-          <ImageField value={form.imageUrl} onChange={(v) => setForm({ ...form, imageUrl: v })} />
+          <ImageField
+            value={form.imageUrl}
+            onChange={(v) => setForm({ ...form, imageUrl: v })}
+            folder="recipes"
+            name={editing?.id ?? draftId}
+            onBusyChange={setUploading}
+          />
         </div>
       </Section>
 
@@ -370,11 +391,20 @@ export default function RecipesPanel() {
       <div className="flex gap-4 pt-2">
         <button
           type="submit"
-          className={`flex-1 py-4 text-xs tracking-[0.25em] uppercase font-medium transition-colors duration-300 ${
+          disabled={busy || uploading}
+          className={`flex-1 py-4 text-xs tracking-[0.25em] uppercase font-medium transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed ${
             saved ? 'bg-emerald-600 text-white' : 'bg-gold text-obsidian hover:bg-gold-light'
           }`}
         >
-          {saved ? '✓ Saved!' : editing ? 'Save Changes' : 'Publish Recipe'}
+          {saved
+            ? '✓ Saved!'
+            : busy
+              ? 'Saving…'
+              : uploading
+                ? 'Uploading photo…'
+                : editing
+                  ? 'Save Changes'
+                  : 'Publish Recipe'}
         </button>
         <button type="button" onClick={() => setMode('list')} className={ghostButtonClass}>
           Cancel

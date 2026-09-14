@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react'
-import { fileToDataUrl } from '../../lib/image'
+import { downscaleImage, uploadImage, type ImageFolder } from '../../lib/image'
 
 export const inputClass =
   'w-full bg-obsidian border border-cream/10 text-cream px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors placeholder:text-cream/20'
@@ -61,31 +61,54 @@ export function Notice({ tone, children }: { tone: 'error' | 'success' | 'info';
   )
 }
 
-/** Image picker: paste a URL or upload a file (downscaled and stored as a data URL). */
+/**
+ * Image picker: paste a URL, or upload a file. Uploads are downscaled in the
+ * browser and stored in the public images bucket; the field then holds the
+ * photo's public URL like any pasted link.
+ */
 export function ImageField({
   label = 'Photo',
   value,
   onChange,
+  folder,
+  name,
+  onBusyChange,
 }: {
   label?: string
   value: string
   onChange: (value: string) => void
+  /** Bucket folder the upload goes in. */
+  folder: ImageFolder
+  /** Id of the recipe or tile; becomes part of the stored file name. */
+  name: string
+  /** Lets the parent disable its save button while an upload is in flight. */
+  onBusyChange?: (busy: boolean) => void
 }) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const isUpload = value.startsWith('data:')
+
+  const updateBusy = (next: boolean) => {
+    setBusy(next)
+    onBusyChange?.(next)
+  }
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return
-    setBusy(true)
+    updateBusy(true)
     setError(null)
     try {
-      onChange(await fileToDataUrl(file))
-    } catch {
-      setError("Couldn't read that file. Try a JPG or PNG.")
+      let blob: Blob
+      try {
+        blob = await downscaleImage(file)
+      } catch {
+        throw new Error("Couldn't read that file. Try a JPG or PNG.")
+      }
+      onChange(await uploadImage(blob, folder, name))
+    } catch (err) {
+      setError(errorMessage(err))
     } finally {
-      setBusy(false)
+      updateBusy(false)
       if (fileRef.current) fileRef.current.value = ''
     }
   }
@@ -95,13 +118,13 @@ export function ImageField({
       <span className={labelClass}>{label}</span>
       <div className="flex gap-2">
         <input
-          value={isUpload ? '' : value}
+          value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={isUpload ? 'Uploaded photo (paste a URL to replace it)' : 'Paste an image URL, or upload a file'}
+          placeholder="Paste an image URL, or upload a file"
           className={`${inputClass} flex-1`}
         />
         <button type="button" onClick={() => fileRef.current?.click()} disabled={busy} className={outlineButtonClass}>
-          {busy ? 'Reading…' : 'Upload'}
+          {busy ? 'Uploading…' : 'Upload'}
         </button>
         <input
           ref={fileRef}
@@ -130,7 +153,9 @@ export function ImageField({
           </button>
         </div>
       )}
-      <p className="text-cream-muted/40 text-xs mt-2">Uploads are resized to 900px on the long edge before saving.</p>
+      <p className="text-cream-muted/40 text-xs mt-2">
+        Uploads are resized to 1600px on the long edge and published with the site.
+      </p>
     </div>
   )
 }
