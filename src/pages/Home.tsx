@@ -79,13 +79,16 @@ export default function Home({ setPage }: HomeProps) {
                 <GoldDiamond />
               </div>
               <p className="text-cream-muted leading-relaxed mb-5 text-[15px]">
-                Hi, I'm Naj, a home cook, culinary creator, and private chef based in Ancaster, Ontario. I grew up surrounded by the bold, fragrant cooking of my Jordanian and Palestinian family, and fell even deeper in love with food after marrying into an Italian one. That beautiful blend of cultures lives in everything I make.
+                Hi, I’m Naj, a home cook, culinary creator, and private chef based in Ancaster, Ontario. I grew up surrounded by the bold, fragrant flavours of my Jordanian and Palestinian family and fell even deeper in love with food after marrying into an Italian family. That beautiful blend of cultures influences so much of what I create today.
               </p>
               <p className="text-cream-muted leading-relaxed mb-5 text-[15px]">
-                What started as a passion for feeding the people I love has grown into a full culinary business. I've competed on the Food Network's <em className="text-cream">Wall of Chefs</em>, built a community of food lovers online, and, most importantly, cooked unforgettable meals in kitchens just like yours across Hamilton, Ancaster, Burlington, and Oakville.
+                What started as a passion for feeding the people I love has grown into a culinary business I’m incredibly proud of. I competed on Flavour Network’s Wall of Chefs and have built a community of food lovers online. Most importantly, I’ve created memorable meals and experiences for families and guests throughout Ancaster, Hamilton, Burlington, Oakville, and the surrounding area.
               </p>
               <p className="text-cream-muted leading-relaxed mb-12 text-[15px]">
-                Whether I'm curating a private dinner, teaching you to build the perfect grazing table, or stocking your freezer with wholesome family meals, my goal is always the same: to make your table a place people never want to leave.
+                Today, I offer private home chef experiences, intimate in-home dinners, family and individual meal prep, cooking workshops, and beautifully curated grazing platters and boards, all with a focus on good food, generous hospitality, and bringing people together.
+              </p>
+              <p className="text-cream-muted leading-relaxed mb-12 text-[15px]">
+                Whether I’m creating a special dinner in your home, teaching a hands-on cooking experience, or filling your fridge with wholesome family meals, my goal is always the same: to make your table a place people never want to leave.
               </p>
               <button
                 onClick={() => setPage('contact')}
@@ -102,12 +105,13 @@ export default function Home({ setPage }: HomeProps) {
                 src={portraitImage}
                 alt="Naj smiling at her kitchen island, surrounded by fresh produce"
                 loading="lazy"
-                className="w-full h-[580px] md:h-[680px] object-cover relative z-10 grayscale"
+                className="w-full h-[580px] md:h-[680px] object-cover relative z-10"
               />
               <div className="absolute -bottom-5 -right-5 w-32 h-32 bg-obsidian border border-gold/30 flex items-center justify-center z-20">
                 <div className="text-center px-2">
-                  <p className="font-display text-lg text-gold italic leading-tight">Food</p>
+                  <p className="font-display text-lg text-gold italic leading-tight">Flavour</p>
                   <p className="font-display text-lg text-gold italic leading-tight">Network</p>
+                  <p className="text-gold-muted text-[9px] tracking-[0.15em] uppercase mt-1">Winner Of</p>
                   <p className="text-gold-muted text-[9px] tracking-[0.15em] uppercase mt-1">Wall of Chefs</p>
                 </div>
               </div>
@@ -215,7 +219,7 @@ function ServiceCard({ index, title, description, image, imageAlt, onBook }: Ser
         <div className="w-8 h-px bg-gold mb-6" />
         <p className="text-cream-muted leading-relaxed text-[15px] flex-1">{description}</p>
         <span className="inline-flex items-center gap-2 text-gold text-xs tracking-[0.25em] uppercase mt-10 opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300">
-          Enquire <span aria-hidden>→</span>
+          Inquire <span aria-hidden>→</span>
         </span>
       </div>
     </button>
