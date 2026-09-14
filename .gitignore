@@ -6,7 +6,7 @@ dist
 dist-ssr
 .vite
 
-# Local environment (copy .env.example to .env)
+# Local environment (copy .env.example to .env.local)
 .env
 .env.*
 !.env.example
@@ -24,3 +24,6 @@ Thumbs.db
 
 # Photo backups from `npm run images:export` (binary and can grow; copy them to a cloud drive instead)
 backups/images
+
+.vercel
+.env*

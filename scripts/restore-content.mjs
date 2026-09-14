@@ -4,7 +4,7 @@
 //   npm run content:restore -- backups/content/site-content-<timestamp>.json
 //
 // Writing needs the project's SECRET key (sb_secret_...), because row-level
-// security only lets a signed-in owner write. Put it in .env as
+// security only lets a signed-in owner write. Put it in .env.local as
 //
 //   SUPABASE_SECRET_KEY=sb_secret_...
 //
@@ -43,7 +43,7 @@ async function main() {
 
   const supabaseUrl = env.VITE_SUPABASE_URL
   const secretKey = env.SUPABASE_SECRET_KEY
-  if (!supabaseUrl) throw new Error('Missing VITE_SUPABASE_URL in .env.')
+  if (!supabaseUrl) throw new Error('Missing VITE_SUPABASE_URL in .env.local.')
   if (secretKey && secretKey.startsWith('sb_publishable_')) {
     throw new Error('SUPABASE_SECRET_KEY holds the publishable key. Writes need the secret key (sb_secret_...).')
   }
@@ -80,7 +80,7 @@ async function main() {
   }
 
   if (!secretKey) {
-    throw new Error('Missing SUPABASE_SECRET_KEY in .env. Add it (no VITE_ prefix) for the restore, then remove it.')
+    throw new Error('Missing SUPABASE_SECRET_KEY in .env.local. Add it (no VITE_ prefix) for the restore, then remove it.')
   }
 
   const supabase = createClient(supabaseUrl, secretKey, { auth: { persistSession: false, autoRefreshToken: false } })
@@ -96,7 +96,7 @@ async function main() {
   console.log('Restored. site_content now holds:')
   for (const row of after) console.log(`  ${row.key}, updated ${row.updated_at}`)
   console.log('Reload the public site and check recipes, Instagram tiles, the Facebook URL and the photos.')
-  console.log('Then remove SUPABASE_SECRET_KEY from .env.')
+  console.log('Then remove SUPABASE_SECRET_KEY from .env.local.')
 }
 
 await main()

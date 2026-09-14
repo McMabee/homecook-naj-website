@@ -246,7 +246,7 @@ function LoginScreen({ backToSite }: { backToSite: ReactNode }) {
       )}
       {!isSupabaseConfigured && (
         <p className="text-center text-cream-muted/40 text-xs mt-6 tracking-wider leading-relaxed">
-          Admin access isn't set up yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to your .env file and
+          Admin access isn't set up yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to your .env.local file and
           restart the dev server.
         </p>
       )}

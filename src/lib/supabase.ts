@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 /**
  * The one Supabase client for the whole site.
  *
- * Both values come from .env and are baked into the bundle at build time. The
+ * Both values come from .env.local and are baked into the bundle at build time. The
  * publishable key is safe to ship: every read and write is checked by the
  * row-level security policies in the Supabase project, and only a signed-in
  * owner passes the write policies.
@@ -25,7 +25,7 @@ export const IMAGES_BUCKET = 'images'
 export class NotConfiguredError extends Error {
   constructor() {
     super(
-      'The site backend is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to .env and restart or rebuild.',
+      'The site backend is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to .env.local and restart or rebuild.',
     )
     this.name = 'NotConfiguredError'
   }

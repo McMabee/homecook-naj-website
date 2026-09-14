@@ -19,7 +19,7 @@ const supabaseUrl = env.VITE_SUPABASE_URL
 const publishableKey = env.VITE_SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !publishableKey) {
-  throw new Error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY in .env (see .env.example).')
+  throw new Error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY in .env.local (see .env.example).')
 }
 
 const supabase = createClient(supabaseUrl, publishableKey, { auth: { persistSession: false } })

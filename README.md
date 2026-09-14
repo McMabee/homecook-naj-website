@@ -13,7 +13,7 @@ Marketing site for Home Cooking with Naj, a private chef and culinary creator ba
 
 ```sh
 npm install
-cp .env.example .env     # then edit the values (see Configuration)
+cp .env.example .env.local     # then edit the values (see Configuration)
 npm run dev              # http://localhost:5173
 ```
 
@@ -27,11 +27,11 @@ Other scripts:
 | `npm run format` | Format the codebase with oxfmt |
 | `npm run content:export` | Saves the live `site_content` rows to `backups/content/` (see Content backup and recovery) |
 | `npm run images:export` | Downloads the `images` bucket to `backups/images/` |
-| `npm run content:restore -- <file>` | Writes a content export back to Supabase; needs the secret key in `.env` |
+| `npm run content:restore -- <file>` | Writes a content export back to Supabase; needs the secret key in `.env.local` |
 
 ## Configuration
 
-Settings live in `.env` (gitignored). `.env.example` documents each one. Vite bakes `VITE_*` variables into the JavaScript bundle at build time, which means:
+Settings live in `.env.local` (gitignored). `.env.example` documents each one. Vite bakes `VITE_*` variables into the JavaScript bundle at build time, which means:
 
 - after changing a value, restart `npm run dev` or rebuild
 - on your host, set the same variables in its environment settings so they are present when the build runs
@@ -42,7 +42,7 @@ Settings live in `.env` (gitignored). `.env.example` documents each one. Vite ba
 | `VITE_SUPABASE_URL` | The Supabase project URL, e.g. `https://abcdefghijkl.supabase.co`. |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | The project's publishable key (`sb_publishable_…`). Safe to ship: reads are public and writes need a signed-in owner. Never put the secret key here. |
 
-If the two Supabase values are missing, visitors see the seed content from `src/store/` and the admin shows a "not set up" message. A `DATABASE_PASSWORD` line in `.env` is only for direct SQL access from tooling; Vite ignores it because it has no `VITE_` prefix.
+If the two Supabase values are missing, visitors see the seed content from `src/store/` and the admin shows a "not set up" message. A `DATABASE_PASSWORD` line in `.env.local` is only for direct SQL access from tooling; Vite ignores it because it has no `VITE_` prefix.
 
 ## Content and the admin
 
@@ -89,7 +89,7 @@ npx supabase storage cp -r ss://images backups/images --experimental --linked
 ### Restore the content rows
 
 1. Find the newest known-good `backups/content/site-content-*.json`.
-2. In the Supabase dashboard, under Project Settings → API Keys, copy the project's **secret** key (`sb_secret_…`) and add it to `.env` as `SUPABASE_SECRET_KEY=…`. The name must not start with `VITE_`: the secret key bypasses row-level security, and Vite bakes every `VITE_` variable into the public site. Never commit it and never add it to the host's build environment; the restore script refuses to run if it finds a `VITE_SUPABASE_SECRET_KEY`.
+2. In the Supabase dashboard, under Project Settings → API Keys, copy the project's **secret** key (`sb_secret_…`) and add it to `.env.local` as `SUPABASE_SECRET_KEY=…`. The name must not start with `VITE_`: the secret key bypasses row-level security, and Vite bakes every `VITE_` variable into the public site. Never commit it and never add it to the host's build environment; the restore script refuses to run if it finds a `VITE_SUPABASE_SECRET_KEY`.
 3. Preview, then write:
 
    ```sh
@@ -98,7 +98,7 @@ npx supabase storage cp -r ss://images backups/images --experimental --linked
    ```
 
    The script upserts the rows by key, so it works whether the table is empty or holds bad data, and it prints the table's keys afterwards.
-4. Remove `SUPABASE_SECRET_KEY` from `.env` again.
+4. Remove `SUPABASE_SECRET_KEY` from `.env.local` again.
 
 ### Restore the photos
 
