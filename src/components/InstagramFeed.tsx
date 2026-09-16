@@ -14,9 +14,9 @@ export default function InstagramFeed() {
   if (!loading && tiles.length === 0) return null
 
   return (
-    <section id="instagram" className="py-28 md:py-40 px-6">
+    <section id="instagram" className="py-20 md:py-28 px-6">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <p className="text-gold tracking-[0.35em] text-xs uppercase mb-5">On Instagram</p>
           <h2 className="font-display text-5xl md:text-6xl text-cream">
             Fresh from <em>the Kitchen</em>
@@ -25,7 +25,7 @@ export default function InstagramFeed() {
             <GoldDiamond />
           </div>
           <p className="text-cream-muted text-lg font-light max-w-lg mx-auto leading-relaxed mt-8">
-            A taste of recent dinners, grazing tables, and behind-the-scenes moments from Naj's kitchen.
+            A selection of recent family dinners, charcuterie boards, and private tables from Naj's kitchen.
           </p>
         </div>
 

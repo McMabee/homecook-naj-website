@@ -9,8 +9,20 @@
   --color-cream: #f5efe0;
   --color-cream-muted: #c8bfad;
 
-  --font-display: 'Playfair Display', Georgia, serif;
+  --font-display: 'Playfair Display', Georgia, arial;
   --font-body: 'Outfit', system-ui, sans-serif;
+
+  /* Testimonials strip: the track holds the list twice, so -50% is one full loop. */
+  --animate-marquee: marquee 40s linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
 }
 
 html,

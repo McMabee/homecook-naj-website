@@ -3,8 +3,12 @@ import spicesImage from '../assets/naj-spices.jpg'
 import GoldDiamond from '../components/GoldDiamond'
 import { useSettings } from '../store/content'
 import { instagramUrl } from '../store/settings'
+import type { ContactService } from '../types'
 
 const FORM_ENDPOINT = import.meta.env.VITE_FORMSUBMIT_ENDPOINT
+
+const SUBJECT_DEFAULT = 'New Enquiry: Home Cooking with Naj'
+const SUBJECT_BRAND = 'New Brand Partnership Enquiry: Home Cooking with Naj'
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
@@ -12,7 +16,12 @@ const inputClass =
   'w-full bg-charcoal border border-cream/10 text-cream px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors duration-200 placeholder:text-cream/20'
 const labelClass = 'block text-[10px] tracking-[0.3em] uppercase text-gold mb-2'
 
-export default function Contact() {
+interface ContactProps {
+  /** Service to preselect in the form, e.g. when arriving from a service card. */
+  initialService?: ContactService | ''
+}
+
+export default function Contact({ initialService = '' }: ContactProps) {
   const settings = useSettings()
   const igUrl = instagramUrl(settings.instagramHandle)
   const [status, setStatus] = useState<Status>('idle')
@@ -22,6 +31,8 @@ export default function Contact() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const data = new FormData(e.currentTarget)
+    // Brand enquiries get their own subject line so they stand out in the inbox.
+    data.set('_subject', data.get('service') === 'brand-partnership' ? SUBJECT_BRAND : SUBJECT_DEFAULT)
 
     if (!FORM_ENDPOINT) {
       console.warn('Contact form: VITE_FORMSUBMIT_ENDPOINT is not set, so the message was not sent.')
@@ -47,7 +58,7 @@ export default function Contact() {
   return (
     <main className="pt-20">
       {/* ── Hero ───────────────────────────────────────────────────── */}
-      <section className="relative py-36 px-6 overflow-hidden">
+      <section className="relative py-20 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-charcoal">
           <img
             src={spicesImage}
@@ -57,15 +68,15 @@ export default function Contact() {
           <div className="absolute inset-0 bg-gradient-to-b from-obsidian/80 via-obsidian/50 to-obsidian" />
         </div>
         <div className="relative z-10 text-center max-w-2xl mx-auto">
-          <p className="text-gold tracking-[0.45em] text-xs uppercase mb-8">Let's Connect</p>
-          <h1 className="font-display text-5xl md:text-7xl text-cream italic leading-tight mb-8">
+          <p className="text-gold tracking-[0.45em] text-xs uppercase mb-6">Let's Connect</p>
+          <h1 className="font-display text-5xl md:text-7xl text-cream italic leading-tight mb-6">
             I'd Love to
             <br />
             Cook for
             <br />
             You
           </h1>
-          <div className="max-w-xs mx-auto mb-8">
+          <div className="max-w-xs mx-auto mb-6">
             <GoldDiamond />
           </div>
           <p className="text-cream-muted text-lg font-light leading-relaxed">
@@ -75,7 +86,7 @@ export default function Contact() {
       </section>
 
       {/* ── Form + Info ─────────────────────────────────────────────── */}
-      <section className="py-24 px-6">
+      <section className="pt-12 pb-16 px-6">
         <div className="max-w-6xl mx-auto grid md:grid-cols-5 gap-16 lg:gap-24">
           {/* Form */}
           <div className="md:col-span-3">
@@ -94,7 +105,7 @@ export default function Contact() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
-                <input type="hidden" name="_subject" value="New Enquiry: Home Cooking with Naj" />
+                <input type="hidden" name="_subject" value={SUBJECT_DEFAULT} />
                 {/* Honeypot: hidden from people, filled in by bots, rejected by FormSubmit */}
                 <input type="text" name="_honey" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
 
@@ -122,13 +133,19 @@ export default function Contact() {
                 <div>
                   <label className={labelClass}>Service of Interest *</label>
                   <div className="relative">
-                    <select name="service" required className={`${inputClass} appearance-none pr-10`}>
+                    <select
+                      name="service"
+                      required
+                      defaultValue={initialService}
+                      className={`${inputClass} appearance-none pr-10`}
+                    >
                       <option value="" className="bg-charcoal">Select a service...</option>
                       <option value="private-dinner" className="bg-charcoal">Private In-Home Dinner</option>
                       <option value="cooking-workshop" className="bg-charcoal">Cooking Workshop or Demo</option>
                       <option value="grazing-table" className="bg-charcoal">Grazing Table or Charcuterie</option>
                       <option value="meal-prep-weekly" className="bg-charcoal">Weekly Family Meal Planning</option>
                       <option value="meal-prep-freezer" className="bg-charcoal">Freezer Meal Package</option>
+                      <option value="brand-partnership" className="bg-charcoal">Brand Partnership or Collaboration</option>
                       <option value="other" className="bg-charcoal">Other / Not Sure Yet</option>
                     </select>
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gold pointer-events-none text-xs">▾</span>
@@ -193,7 +210,7 @@ export default function Contact() {
                 <h3 className="font-display text-xl italic text-gold mb-8">Find Me Here</h3>
                 <div className="space-y-6">
                   <InfoItem label="Location">
-                    <p className="text-cream-muted text-sm">Ancaster, Ontario<br />Serving Hamilton, Ancaster, Burlington & Oakville</p>
+                    <p className="text-cream-muted text-sm">Ancaster, Ontario<br />Serving Ancaster, Hamilton, Burlington & Oakville</p>
                   </InfoItem>
                   <InfoItem label="Response Time">
                     <p className="text-cream-muted text-sm">Within 48 hours</p>
