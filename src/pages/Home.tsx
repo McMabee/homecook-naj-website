@@ -50,7 +50,7 @@ export default function Home({ openContact }: HomeProps) {
               Bringing warmth, heritage, and elevated home cooking to your table, from Ancaster and Hamilton to Burlington and Oakville.
             </p>
             <p className="font-display text-cream text-lg md:text-xl max-w-lg mx-auto leading-relaxed mb-12">
-              Private Home Chef Dinners · Family Meal Preps · Culinary Experiences · Charcuterie Boards & Platters
+              Private Home Chef Dinners · Family Meal Preps Culinary Experiences · Charcuterie Boards & Platters
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
