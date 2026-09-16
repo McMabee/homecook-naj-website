@@ -38,9 +38,11 @@ const TESTIMONIALS: Testimonial[] = [
     long: true,
   },
   {
-    quote: 'Very talented lady love everything she makes',
-    name: 'Enia Quaglia',
-    detail: 'Facebook Review',
+    quote:
+      'We had Naj cook at our house a few times for dinner parties and it was the most incredible experience!! She let us pick our desired menu, bought the best ingredients, cooked at our house (explaining each course) and cleaned up everything! It was absolutely delicious and so fun and my friends still talk about what a great evening it was! I loved how I could relax and enjoy the evening and how creative it made the evening! So so fun!!',
+    name: 'Jan',
+    detail: 'Catered Events & Gatherings',
+    long: true,
   },
 ]
 
