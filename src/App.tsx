@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import type { ContactService, Page } from './types'
 import Nav from './components/Nav'
 import Footer from './components/Footer'
@@ -10,6 +11,18 @@ import { ContentProvider } from './store/content'
 import { useAuth } from './lib/auth'
 
 export type { Page }
+
+/**
+ * Path reported to Vercel Web Analytics for each state-driven page. The URL
+ * never changes in this app, so this is what makes each page show up as its
+ * own entry in the dashboard. The admin is deliberately not tracked.
+ */
+const ANALYTICS_PATHS: Record<Page, string | null> = {
+  home: '/',
+  recipes: '/recipes',
+  contact: '/contact',
+  admin: null,
+}
 
 export default function App() {
   const [page, setPage] = useState<Page>('home')
@@ -49,6 +62,11 @@ export default function App() {
         {page === 'contact' && <Contact initialService={contactService} />}
         {page === 'admin' && <Admin auth={auth} onExit={() => setPage('home')} />}
         {showFooter && <Footer setPage={setPage} />}
+        <Analytics
+          route={ANALYTICS_PATHS[page]}
+          path={ANALYTICS_PATHS[page]}
+          mode={import.meta.env.DEV ? 'development' : 'production'}
+        />
       </div>
     </ContentProvider>
   )
