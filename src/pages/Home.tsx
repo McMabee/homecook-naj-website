@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import type { ContactService } from '../types'
 import heroImage from '../assets/naj-hero.jpg'
 import portraitImage from '../assets/naj-portrait.jpg'
@@ -223,26 +224,77 @@ interface ServiceCardProps {
 }
 
 function ServiceCard({ index, title, description, image, imageAlt, cta, onBook }: ServiceCardProps) {
+  const cardRef = useRef<HTMLButtonElement>(null)
+  const [isScrollActive, setIsScrollActive] = useState(false)
+
+  useEffect(() => {
+    const card = cardRef.current
+    if (!card) return
+
+    const mobileQuery = window.matchMedia('(max-width: 767px)')
+    let observer: IntersectionObserver | undefined
+
+    const updateObserver = () => {
+      observer?.disconnect()
+      observer = undefined
+
+      if (!mobileQuery.matches) {
+        setIsScrollActive(false)
+        return
+      }
+
+      observer = new IntersectionObserver(
+        ([entry]) => setIsScrollActive(entry.isIntersecting),
+        { rootMargin: '-35% 0px -35% 0px', threshold: 0 },
+      )
+      observer.observe(card)
+    }
+
+    updateObserver()
+    mobileQuery.addEventListener('change', updateObserver)
+
+    return () => {
+      observer?.disconnect()
+      mobileQuery.removeEventListener('change', updateObserver)
+    }
+  }, [])
+
   return (
     <button
+      ref={cardRef}
       className="group relative overflow-hidden bg-charcoal hover:bg-obsidian transition-colors duration-500 text-left w-full"
       onClick={onBook}
     >
-      {/* Background photo, revealed on hover. Adjust `opacity-35` to change how strong it is. */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+      {/* On phones the middle of the viewport acts like hover; pointer devices keep hover. */}
+      <div
+        className={`absolute inset-0 transition-opacity duration-700 ${
+          isScrollActive ? 'opacity-100' : 'opacity-0'
+        } md:opacity-0 md:group-hover:opacity-100`}
+      >
         <img src={image} alt={imageAlt} className="w-full h-full object-cover opacity-35" />
       </div>
       <div className="relative z-10 p-10 md:p-12 h-full flex flex-col">
-        {/* Card number. `text-gold/30` is the resting opacity, `group-hover:text-gold/50` the hover opacity. */}
-        <span className="font-display text-7xl text-gold/30 group-hover:text-gold/50 leading-none block mb-4 transition-colors duration-300">
+        <span
+          className={`font-display text-7xl leading-none block mb-4 transition-colors duration-300 ${
+            isScrollActive ? 'text-gold/50' : 'text-gold/30'
+          } md:text-gold/30 md:group-hover:text-gold/50`}
+        >
           0{index}
         </span>
-        <h3 className="font-display text-2xl md:text-3xl text-cream mb-4 group-hover:text-gold transition-colors duration-300">
+        <h3
+          className={`font-display text-2xl md:text-3xl mb-4 transition-colors duration-300 ${
+            isScrollActive ? 'text-gold' : 'text-cream'
+          } md:text-cream md:group-hover:text-gold`}
+        >
           {title}
         </h3>
         <div className="w-8 h-px bg-gold mb-6" />
         <p className="text-cream-muted leading-relaxed text-[15px] flex-1">{description}</p>
-        <span className="inline-flex items-center gap-2 text-gold text-xs tracking-[0.25em] uppercase mt-10 opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300">
+        <span
+          className={`inline-flex items-center gap-2 text-gold text-xs tracking-[0.25em] uppercase mt-10 transition-all duration-300 ${
+            isScrollActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+          } md:opacity-0 md:translate-y-3 md:group-hover:opacity-100 md:group-hover:translate-y-0`}
+        >
           {cta} <span aria-hidden>→</span>
         </span>
       </div>

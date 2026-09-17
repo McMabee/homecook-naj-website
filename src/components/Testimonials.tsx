@@ -51,7 +51,11 @@ const SECONDS_PER_CARD = 8
 
 export default function Testimonials() {
   return (
-    <section id="testimonials" aria-labelledby="testimonials-heading" className="py-20 md:py-28 overflow-hidden">
+    <section
+      id="testimonials"
+      aria-labelledby="testimonials-heading"
+      className="pt-20 pb-10 md:pt-28 md:pb-14 overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-6 text-center mb-14">
         <p className="text-gold tracking-[0.35em] text-xs uppercase mb-5">Kind Words</p>
         <h2 id="testimonials-heading" className="font-display text-5xl md:text-6xl text-cream">

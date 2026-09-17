@@ -14,7 +14,7 @@ export default function InstagramFeed() {
   if (!loading && tiles.length === 0) return null
 
   return (
-    <section id="instagram" className="py-20 md:py-28 px-6">
+    <section id="instagram" className="pt-10 pb-20 md:pt-14 md:pb-28 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <p className="text-gold tracking-[0.35em] text-xs uppercase mb-5">On Instagram</p>
