@@ -400,7 +400,7 @@ function ServiceArea() {
       <div className="max-w-4xl mx-auto text-center">
         <p className="text-gold tracking-[0.35em] text-xs uppercase mb-5">Where I Cook</p>
         <h2 className="font-display text-4xl md:text-5xl text-cream leading-tight mb-8">
-          Your Home Chef in Ancaster, Hamilton,
+          Your Home Chef in <em>Ancaster, Hamilton,</em>
           <br />
           <em>Burlington &amp; Oakville</em>
         </h2>
