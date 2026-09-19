@@ -5,7 +5,32 @@ import { useSettings } from '../store/content'
 import { instagramUrl } from '../store/settings'
 import type { ContactService } from '../types'
 
-const FORM_ENDPOINT = import.meta.env.VITE_FORMSUBMIT_ENDPOINT
+/**
+ * FormSubmit has separate endpoints for browser navigation and AJAX requests.
+ * Accept either form in configuration, but always use the AJAX endpoint here
+ * because this component submits with fetch.
+ */
+function formSubmitAjaxEndpoint(configuredEndpoint?: string) {
+  if (!configuredEndpoint) return null
+
+  try {
+    const url = new URL(configuredEndpoint.trim())
+    if (url.protocol !== 'https:' || url.hostname !== 'formsubmit.co') return null
+
+    const path = url.pathname.replace(/^\/+|\/+$/g, '')
+    const destination = path.startsWith('ajax/') ? path.slice('ajax/'.length) : path
+    if (!destination || destination.includes('/')) return null
+
+    url.pathname = `/ajax/${destination}`
+    url.search = ''
+    url.hash = ''
+    return url.toString()
+  } catch {
+    return null
+  }
+}
+
+const FORM_ENDPOINT = formSubmitAjaxEndpoint(import.meta.env.VITE_FORMSUBMIT_ENDPOINT)
 
 const SUBJECT_DEFAULT = 'New Enquiry: Home Cooking with Naj'
 const SUBJECT_BRAND = 'New Brand Partnership Enquiry: Home Cooking with Naj'
@@ -44,10 +69,17 @@ export default function Contact({ initialService = '' }: ContactProps) {
     try {
       const res = await fetch(FORM_ENDPOINT, {
         method: 'POST',
-        body: data,
-        headers: { Accept: 'application/json' },
+        body: JSON.stringify(Object.fromEntries(data.entries())),
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
       })
-      if (!res.ok) throw new Error(`Form endpoint responded with ${res.status}`)
+      const result = (await res.json()) as { success?: boolean | string; message?: string }
+      const accepted = result.success === true || result.success === 'true'
+      if (!res.ok || !accepted) {
+        throw new Error(result.message || `Form endpoint responded with ${res.status}`)
+      }
       setStatus('sent')
     } catch (err) {
       console.error('Contact form submission failed:', err)

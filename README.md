@@ -38,7 +38,7 @@ Settings live in `.env.local` (gitignored). `.env.example` documents each one. V
 
 | Variable | Purpose |
 | --- | --- |
-| `VITE_FORMSUBMIT_ENDPOINT` | Where the contact form posts. Uses [FormSubmit](https://formsubmit.co) in the form `https://formsubmit.co/ajax/<email>`. The first real submission triggers a one-time activation email to that address. If unset, the form shows an error instead of pretending to send. |
+| `VITE_FORMSUBMIT_ENDPOINT` | Where the contact form posts. Uses [FormSubmit](https://formsubmit.co) in the form `https://formsubmit.co/ajax/<email>`. The app normalizes a FormSubmit URL that is missing `/ajax/`, validates FormSubmit's JSON response, and shows an error instead of pretending to send when configuration or delivery fails. The first real submission still triggers a one-time activation email to the destination address. |
 | `VITE_SUPABASE_URL` | The Supabase project URL, e.g. `https://abcdefghijkl.supabase.co`. |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | The project's publishable key (`sb_publishable_…`). Safe to ship: reads are public and writes need a signed-in owner. Never put the secret key here. |
 
