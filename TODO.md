@@ -5,7 +5,7 @@ Check off tasks as they are completed. The site is a static Vite app; its conten
 ## Before launch
 
 - [ ] **Choose how site content will be published.** For a static launch, update and commit the seed recipes, Instagram tiles, and social settings in `src/store/`, then disable the browser-only admin. If Naj needs to edit the live site, complete the "Production admin work" section below first.
-- [ ] **Set up and test the contact form.** Configure `VITE_FORMSUBMIT_ENDPOINT` for Naj's real inbox, complete FormSubmit's activation, and submit a real test enquiry. Confirm that Naj receives it and that the form shows the correct success or error state. (`src/pages/Contact.tsx`, `.env.example`)
+- [ ] **Test the contact form.** Confirm the opaque FormSubmit destination in `src/pages/Contact.tsx` is activated for the production domain, then submit a real test enquiry and verify that Naj receives it.
 - [ ] **Review the public content with Naj.** Confirm the biography, service descriptions and areas, response-time promise, brand-partner names/logos, social links, and every published recipe's ingredients and method. (`src/pages/`, `src/components/BrandPartners.tsx`, `src/store/recipes.ts`)
 - [ ] **Replace the four sample Instagram tiles.** Use approved photos, accurate captions, and links to the specific posts; commit the finished tiles to `src/store/instagram.ts` for a static launch. The current tiles link to the profile.
 - [ ] **Finalize imagery.** Replace the remaining Unsplash images in the service cards, home-page feature band, and Recipes header with approved images; check crops and loading on mobile. (`src/pages/Home.tsx`, `src/pages/Recipes.tsx`)

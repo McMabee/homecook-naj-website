@@ -38,11 +38,12 @@ Settings live in `.env.local` (gitignored). `.env.example` documents each one. V
 
 | Variable | Purpose |
 | --- | --- |
-| `VITE_FORMSUBMIT_ENDPOINT` | Where the contact form posts. Uses [FormSubmit](https://formsubmit.co) in the form `https://formsubmit.co/ajax/<email>`. The app normalizes a FormSubmit URL that is missing `/ajax/`, validates FormSubmit's JSON response, and shows an error instead of pretending to send when configuration or delivery fails. The first real submission still triggers a one-time activation email to the destination address. |
 | `VITE_SUPABASE_URL` | The Supabase project URL, e.g. `https://abcdefghijkl.supabase.co`. |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | The project's publishable key (`sb_publishable_…`). Safe to ship: reads are public and writes need a signed-in owner. Never put the secret key here. |
 
 If the two Supabase values are missing, visitors see the seed content from `src/store/` and the admin shows a "not set up" message. A `DATABASE_PASSWORD` line in `.env.local` is only for direct SQL access from tooling; Vite ignores it because it has no `VITE_` prefix.
+
+The contact form uses FormSubmit's opaque destination directly in `src/pages/Contact.tsx`. It submits as a standard HTML form with `method="POST"` into a new tab, following [FormSubmit's documented setup](https://formsubmit.co), without publishing the owner's email address.
 
 ## Content and the admin
 
@@ -124,7 +125,7 @@ No redirect or rewrite rules are needed because there is only one route. If you 
 
 ## Before going live
 
-1. **Contact form.** Set `VITE_FORMSUBMIT_ENDPOINT` to Naj's real address and send one test message to complete FormSubmit's activation.
+1. **Contact form.** Confirm that FormSubmit is activated for the production domain, then send one test message through the deployed site and verify that it reaches Naj.
 2. **Supabase project.** The admin needs the `site_content` table and the `images` bucket with their row-level security policies, one owner account, and sign-ups turned off under Authentication. While sign-ups are open, anyone who registers counts as `authenticated` and passes the write policies. The full checklist, in order, is in `TODO.md`.
 3. **Backups.** The free tier has no automatic database backups. After Naj's editing sessions run `npm run content:export` and `npm run images:export`, and commit the JSON export; the restore steps are under "Content backup and recovery" above.
 4. **Photos.** `src/assets/` holds web-sized copies of photos from `pics/` (the originals, which are not deployed). The home hero, the About section, the Private In-Home Dinners service card, and the Contact page header use them. Stock Unsplash photos are still used for the other three service cards, the "every table deserves a little magic" band, and the Recipes page header. Swap any of them by dropping a file into `src/assets/` and updating the `src` in the relevant component.

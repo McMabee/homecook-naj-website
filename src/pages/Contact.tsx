@@ -1,41 +1,15 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import spicesImage from '../assets/naj-spices.jpg'
 import GoldDiamond from '../components/GoldDiamond'
 import { useSettings } from '../store/content'
 import { instagramUrl } from '../store/settings'
 import type { ContactService } from '../types'
 
-/**
- * FormSubmit has separate endpoints for browser navigation and AJAX requests.
- * Accept either form in configuration, but always use the AJAX endpoint here
- * because this component submits with fetch.
- */
-function formSubmitAjaxEndpoint(configuredEndpoint?: string) {
-  if (!configuredEndpoint) return null
-
-  try {
-    const url = new URL(configuredEndpoint.trim())
-    if (url.protocol !== 'https:' || url.hostname !== 'formsubmit.co') return null
-
-    const path = url.pathname.replace(/^\/+|\/+$/g, '')
-    const destination = path.startsWith('ajax/') ? path.slice('ajax/'.length) : path
-    if (!destination || destination.includes('/')) return null
-
-    url.pathname = `/ajax/${destination}`
-    url.search = ''
-    url.hash = ''
-    return url.toString()
-  } catch {
-    return null
-  }
-}
-
-const FORM_ENDPOINT = formSubmitAjaxEndpoint(import.meta.env.VITE_FORMSUBMIT_ENDPOINT)
+// FormSubmit's opaque destination keeps the owner's email out of the public bundle.
+const FORM_ENDPOINT = 'https://formsubmit.co/25fff5e1a6444a2353130a1e1bb26e2c'
 
 const SUBJECT_DEFAULT = 'New Enquiry: Home Cooking with Naj'
 const SUBJECT_BRAND = 'New Brand Partnership Enquiry: Home Cooking with Naj'
-
-type Status = 'idle' | 'sending' | 'sent' | 'error'
 
 const inputClass =
   'w-full bg-charcoal border border-cream/10 text-cream px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors duration-200 placeholder:text-cream/20'
@@ -49,43 +23,7 @@ interface ContactProps {
 export default function Contact({ initialService = '' }: ContactProps) {
   const settings = useSettings()
   const igUrl = instagramUrl(settings.instagramHandle)
-  const [status, setStatus] = useState<Status>('idle')
-  const sending = status === 'sending'
-  const submitted = status === 'sent'
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const data = new FormData(e.currentTarget)
-    // Brand enquiries get their own subject line so they stand out in the inbox.
-    data.set('_subject', data.get('service') === 'brand-partnership' ? SUBJECT_BRAND : SUBJECT_DEFAULT)
-
-    if (!FORM_ENDPOINT) {
-      console.warn('Contact form: VITE_FORMSUBMIT_ENDPOINT is not set, so the message was not sent.')
-      setStatus('error')
-      return
-    }
-
-    setStatus('sending')
-    try {
-      const res = await fetch(FORM_ENDPOINT, {
-        method: 'POST',
-        body: JSON.stringify(Object.fromEntries(data.entries())),
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      })
-      const result = (await res.json()) as { success?: boolean | string; message?: string }
-      const accepted = result.success === true || result.success === 'true'
-      if (!res.ok || !accepted) {
-        throw new Error(result.message || `Form endpoint responded with ${res.status}`)
-      }
-      setStatus('sent')
-    } catch (err) {
-      console.error('Contact form submission failed:', err)
-      setStatus('error')
-    }
-  }
+  const [selectedService, setSelectedService] = useState<ContactService | ''>(initialService)
 
   return (
     <main className="pt-20">
@@ -127,112 +65,88 @@ export default function Contact({ initialService = '' }: ContactProps) {
               Fill out the form and I'll get back to you within 48 hours.
             </p>
 
-            {submitted ? (
-              <div className="border border-gold/30 bg-gold/5 py-16 px-10 text-center">
-                <div className="w-12 h-px bg-gold mx-auto mb-8" />
-                <p className="font-display text-3xl italic text-gold mb-4">Thank You!</p>
-                <p className="text-cream-muted leading-relaxed max-w-sm mx-auto">
-                  Your message has been sent. I can't wait to chat, and I'll be in touch shortly!
-                </p>
+            <form action={FORM_ENDPOINT} method="POST" target="_blank" className="space-y-6">
+              <input
+                type="hidden"
+                name="_subject"
+                value={selectedService === 'brand-partnership' ? SUBJECT_BRAND : SUBJECT_DEFAULT}
+              />
+              {/* Honeypot: hidden from people, filled in by bots, rejected by FormSubmit */}
+              <input type="text" name="_honey" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <label className={labelClass}>First Name *</label>
+                  <input name="first_name" required placeholder="Jane" className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Last Name *</label>
+                  <input name="last_name" required placeholder="Smith" className={inputClass} />
+                </div>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <input type="hidden" name="_subject" value={SUBJECT_DEFAULT} />
-                {/* Honeypot: hidden from people, filled in by bots, rejected by FormSubmit */}
-                <input type="text" name="_honey" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
 
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className={labelClass}>First Name *</label>
-                    <input name="first_name" required placeholder="Jane" className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Last Name *</label>
-                    <input name="last_name" required placeholder="Smith" className={inputClass} />
-                  </div>
-                </div>
+              <div>
+                <label className={labelClass}>Email Address *</label>
+                <input name="email" type="email" required placeholder="jane@example.com" className={inputClass} />
+              </div>
 
-                <div>
-                  <label className={labelClass}>Email Address *</label>
-                  <input name="email" type="email" required placeholder="jane@example.com" className={inputClass} />
-                </div>
+              <div>
+                <label className={labelClass}>Phone Number</label>
+                <input name="phone" type="tel" placeholder="+1 (905) 000-0000" className={inputClass} />
+              </div>
 
-                <div>
-                  <label className={labelClass}>Phone Number</label>
-                  <input name="phone" type="tel" placeholder="+1 (905) 000-0000" className={inputClass} />
-                </div>
-
-                <div>
-                  <label className={labelClass}>Service of Interest *</label>
-                  <div className="relative">
-                    <select
-                      name="service"
-                      required
-                      defaultValue={initialService}
-                      className={`${inputClass} appearance-none pr-10`}
-                    >
-                      <option value="" className="bg-charcoal">Select a service...</option>
-                      <option value="private-dinner" className="bg-charcoal">Private In-Home Dinner</option>
-                      <option value="cooking-workshop" className="bg-charcoal">Cooking Workshop or Demo</option>
-                      <option value="grazing-table" className="bg-charcoal">Grazing Table or Charcuterie</option>
-                      <option value="meal-prep-weekly" className="bg-charcoal">Weekly Family Meal Planning</option>
-                      <option value="meal-prep-freezer" className="bg-charcoal">Freezer Meal Package</option>
-                      <option value="brand-partnership" className="bg-charcoal">Brand Partnership or Collaboration</option>
-                      <option value="other" className="bg-charcoal">Other / Not Sure Yet</option>
-                    </select>
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gold pointer-events-none text-xs">▾</span>
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className={labelClass}>Preferred Date</label>
-                    <input name="preferred_date" type="date" className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Number of Guests</label>
-                    <input name="guests" type="number" min="1" placeholder="e.g. 8" className={inputClass} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Message *</label>
-                  <textarea
-                    name="message"
+              <div>
+                <label className={labelClass}>Service of Interest *</label>
+                <div className="relative">
+                  <select
+                    name="service"
                     required
-                    rows={6}
-                    placeholder="Tell me about your occasion, any dietary needs, allergies, or anything else I should know..."
-                    className={`${inputClass} resize-none`}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={sending}
-                  className="w-full bg-gold text-obsidian py-4 text-xs tracking-[0.25em] uppercase font-medium hover:bg-gold-light transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {sending ? 'Sending...' : 'Send Message'}
-                </button>
-
-                {status === 'error' && (
-                  <p
-                    role="alert"
-                    className="border border-red-500/30 bg-red-500/5 text-red-300/90 text-sm px-5 py-4 leading-relaxed"
+                    value={selectedService}
+                    onChange={(e) => setSelectedService(e.target.value as ContactService | '')}
+                    className={`${inputClass} appearance-none pr-10`}
                   >
-                    Sorry, your message couldn't be sent right now. Please try again in a moment, or reach me directly on{' '}
-                    <a
-                      href={igUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gold underline underline-offset-4 hover:text-gold-light transition-colors"
-                    >
-                      Instagram
-                    </a>
-                    .
-                  </p>
-                )}
-              </form>
-            )}
+                    <option value="" className="bg-charcoal">Select a service...</option>
+                    <option value="private-dinner" className="bg-charcoal">Private In-Home Dinner</option>
+                    <option value="cooking-workshop" className="bg-charcoal">Cooking Workshop or Demo</option>
+                    <option value="grazing-table" className="bg-charcoal">Grazing Table or Charcuterie</option>
+                    <option value="meal-prep-weekly" className="bg-charcoal">Weekly Family Meal Planning</option>
+                    <option value="meal-prep-freezer" className="bg-charcoal">Freezer Meal Package</option>
+                    <option value="brand-partnership" className="bg-charcoal">Brand Partnership or Collaboration</option>
+                    <option value="other" className="bg-charcoal">Other / Not Sure Yet</option>
+                  </select>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gold pointer-events-none text-xs">▾</span>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <label className={labelClass}>Preferred Date</label>
+                  <input name="preferred_date" type="date" className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Number of Guests</label>
+                  <input name="guests" type="number" min="1" placeholder="e.g. 8" className={inputClass} />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Message *</label>
+                <textarea
+                  name="message"
+                  required
+                  rows={6}
+                  placeholder="Tell me about your occasion, any dietary needs, allergies, or anything else I should know..."
+                  className={`${inputClass} resize-none`}
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-gold text-obsidian py-4 text-xs tracking-[0.25em] uppercase font-medium hover:bg-gold-light transition-colors duration-300"
+              >
+                Send Message
+              </button>
+            </form>
           </div>
 
           {/* Info sidebar */}
